@@ -1,0 +1,11 @@
+cffi==1.17.1
+numpy==2.2.3
+pandas==2.2.3
+pycparser==2.22
+pygame==2.6.1
+pymunk==6.11.1
+python-dateutil==2.9.0.post0
+PyTMX==3.32
+pytz==2025.1
+six==1.17.0
+tzdata==2025.1
