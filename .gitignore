@@ -1,0 +1,32 @@
+# Python bytecode
+__pycache__/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.py[cod]
+
+# Distribuciones
+build/
+dist/
+*.egg-info/
+
+# Entornos virtuales
+.env/
+venv/
+my_env/
+
+# Archivos de configuración del editor
+*.vscode/
+.idea/
+
+# Archivos temporales
+*.log
+*.tmp
+
+# Imágenes, sonidos o recursos generados
+assets/generated/
+
+# Archivos específicos de Pygame (opcional)
+*.sav
+*.dat
+
