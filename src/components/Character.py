@@ -23,13 +23,16 @@ class Player(pygame.sprite.Sprite):
         # Controles personalizados
         self.keys = keys
 
+        # Ver si el jugador está tocando un obstáculo
+        self.isColliding = False
+
     def update(self):
         keys = pygame.key.get_pressed()
         if keys[self.keys['left']]:
             self.rect.x -= 5
         if keys[self.keys['right']]:
             self.rect.x += 5
-        if keys[self.keys['jump']] and self.rect.bottom >= SCREEN_HEIGHT:
+        if keys[self.keys['jump']] and (self.isColliding or self.rect.bottom >= SCREEN_HEIGHT):
             self.jump()
 
         # Aplicar gravedad
@@ -43,8 +46,10 @@ class Player(pygame.sprite.Sprite):
 
         # Evitar salir de la pantalla
         self.choque()
-
+    
     def choque(self, obstacles: list['Obstacle'] = []):
+        isColliding = False
+        
         # Limitar los bordes de la pantalla
         if self.rect.left < 0:
             self.rect.left = 0
@@ -58,6 +63,9 @@ class Player(pygame.sprite.Sprite):
                 if self.vel_y > 0 and self.rect.bottom >= obstacle.rect.top:
                     self.rect.bottom = obstacle.rect.top
                     self.vel_y = 0
+                isColliding = True
+        return isColliding
+                
 
     def jump(self):
         self.vel_y = self.jump_strength

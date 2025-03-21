@@ -48,7 +48,7 @@ while running:
     # Actualizar
     all_sprites.update()
     for player in players:
-        player.choque(obstacles.sprites())
+        player.isColliding = player.choque(obstacles.sprites())
 
     # Dibujar
     screen.fill((0, 0, 0))
