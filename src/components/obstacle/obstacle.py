@@ -12,7 +12,7 @@ class Obstacle(pygame.sprite.Sprite):
 
 
 list_obstacles = [
-    Obstacle(300, 400, 100, 20, (255, 0, 0)),
+    Obstacle(300, 400, 500, 20, (255, 0, 0)),
     Obstacle(400, 550, 100, 50, (255, 255, 0)),
     Obstacle(550, 500, 60, 100, (0, 255, 255))
 ]
