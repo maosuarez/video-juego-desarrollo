@@ -14,6 +14,7 @@ dist/
 .env/
 venv/
 my_env/
+pygame-env/
 
 # Archivos de configuración del editor
 *.vscode/
