@@ -47,17 +47,21 @@ class Player(pygame.sprite.Sprite):
 
         # Aplicar gravedad
         self.vel_y += self.gravity
-        
+
         # Movimiento en y (con colisiones)
         self.move_vertical(all_sprites)
 
         # Limitar con la pantalla
         self.bordes()
 
-    def move_horizontal(self, sprites):
+    def move_horizontal(self,
+                        sprites: list[Union['Obstacle', 'Player']]
+                        ) -> tuple[bool, bool]:
+        right, left = False, False
+
         # Aplicar movimiento horizontal
         self.rect.x += self.vel_x
-        
+
         # Verificar colisiones horizontales
         for sprite in sprites:
             # Evitar colisionar consigo mismo
@@ -72,29 +76,53 @@ class Player(pygame.sprite.Sprite):
                         # Colisión por la derecha
                         if self.vel_x > 0:
                             sprite.rect.left = self.rect.right
+                            sprite.vel_x = self.vel_x
+                            right = True
                         # Colisión por la izquierda
                         elif self.vel_x < 0:
                             sprite.rect.right = self.rect.left
+                            sprite.vel_x = self.vel_x
+                            left = True
                         # Si ambos se mueven en direcciones opuestas
                         if self.vel_x == -sprite.vel_x:
                             self.rect.x -= self.vel_x
-                
+
+                        floor, left, right = sprite.bordes()
+                        if floor:
+                            self.vel_y = 0
+                            self.jump_available = True
+                        if left:
+                            self.rect.left = sprite.rect.right
+                        if right:
+                            self.rect.right = sprite.rect.left
+
+                        keep_left, keep_right = sprite.move_horizontal(
+                            [spr for spr in sprites if spr != self]
+                            )
+                        if keep_left:
+                            self.rect.left = sprite.rect.right
+                        if keep_right:
+                            self.rect.right = sprite.rect.left
+
                 # Colisión con obstáculo
                 elif not isinstance(sprite, type(self)):
                     # Colisión por la derecha
                     if self.vel_x > 0:
                         self.rect.right = sprite.rect.left
+                        right = True
                     # Colisión por la izquierda
                     elif self.vel_x < 0:
                         self.rect.left = sprite.rect.right
+                        left = True
+        return left, right
 
-    def move_vertical(self, sprites):
+    def move_vertical(self, sprites: list[Union['Obstacle', 'Player']]):
         # Guardar posición anterior
         old_y = self.rect.y
-        
+
         # Aplicar movimiento vertical
         self.rect.y += self.vel_y
-        
+
         for sprite in sprites:
             # Evitar colisionar consigo mismo
             if sprite == self:
@@ -110,22 +138,30 @@ class Player(pygame.sprite.Sprite):
                     self.jump_available = True
                 # Si antes estábamos debajo del sprite (colisión hacia arriba)
                 elif old_y >= sprite.rect.y + sprite.rect.height:
+                    if isinstance(sprite, type(self)):
+                        continue
                     self.rect.top = sprite.rect.bottom
-                    self.vel_y = 1  # Pequeña velocidad hacia abajo para iniciar caída
+                    # Pequeña velocidad hacia abajo para iniciar caída
+                    self.vel_y = 1
                 # Colisión lateral (ya manejada en move_horizontal)
 
-    def bordes(self):
+    def bordes(self) -> tuple[bool, bool, bool]:
+        floor, left, right = False, False, False
         # Limitar al suelo
         if self.rect.bottom >= SCREEN_HEIGHT:
             self.rect.bottom = SCREEN_HEIGHT
             self.vel_y = 0
             self.jump_available = True
+            floor = True
         # Limitar el borde izquierdo
         if self.rect.left < 0:
             self.rect.left = 0
+            left = True
         # Limitar el borde derecho
         if self.rect.right > SCREEN_WIDTH:
             self.rect.right = SCREEN_WIDTH
+            right = True
+        return floor, left, right
 
     def jump(self):
         self.vel_y = self.jump_strength

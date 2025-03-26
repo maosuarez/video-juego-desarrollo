@@ -38,6 +38,7 @@ while running:
 
     # Pantalla con el fondo
     screen.blit(background, (0, 0))  # Dibujar fondo en la pantalla
+    screen.fill((0, 0, 0))
 
     # Actualizar
     all_sprites.update(all_sprites)
