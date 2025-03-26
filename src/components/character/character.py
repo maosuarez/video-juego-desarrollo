@@ -28,6 +28,8 @@ class Player(pygame.sprite.Sprite):
         self.jump_available = True  # ¿Esta permitido el salto?
 
         # Colisiones
+        self.isStuck = False # ¿Está el jugador pegado al muro?
+        self.isStuckScreen = False # ¿Está el jugador pegado al borde de la pantalla?
 
         # Controles personalizados
         self.keys = keys
@@ -55,6 +57,7 @@ class Player(pygame.sprite.Sprite):
         self.bordes()
 
     def move_horizontal(self, sprites):
+        self.isStuck = False
         # Aplicar movimiento horizontal
         self.rect.x += self.vel_x
         
@@ -69,18 +72,30 @@ class Player(pygame.sprite.Sprite):
                 # Colisión con el mismo tipo (jugador)
                 if isinstance(sprite, type(self)):
                     if self.rect.centery == sprite.rect.centery:
-                        # Colisión por la derecha
-                        if self.vel_x > 0:
-                            sprite.rect.left = self.rect.right
-                        # Colisión por la izquierda
-                        elif self.vel_x < 0:
-                            sprite.rect.right = self.rect.left
-                        # Si ambos se mueven en direcciones opuestas
-                        if self.vel_x == -sprite.vel_x:
-                            self.rect.x -= self.vel_x
+                        # Ver si puedo mover al otro jugador
+                        if(not sprite.isStuck and not sprite.isStuckScreen):
+                            # Colisión por la derecha
+                            if self.vel_x > 0:
+                                sprite.rect.left = self.rect.right
+                            # Colisión por la izquierda
+                            elif self.vel_x < 0:
+                                sprite.rect.right = self.rect.left
+                            # Si ambos se mueven en direcciones opuestas
+                            if self.vel_x == -sprite.vel_x:
+                                self.rect.x -= self.vel_x
+
+                        # Si no puedo, tratarlo como obstáculo
+                        else:
+                            # Colisión por la derecha
+                            if self.vel_x > 0:
+                                self.rect.right = sprite.rect.left
+                            # Colisión por la izquierda
+                            elif self.vel_x < 0:
+                                self.rect.left = sprite.rect.right
                 
                 # Colisión con obstáculo
                 elif not isinstance(sprite, type(self)):
+                    self.isStuck = True
                     # Colisión por la derecha
                     if self.vel_x > 0:
                         self.rect.right = sprite.rect.left
@@ -115,6 +130,7 @@ class Player(pygame.sprite.Sprite):
                 # Colisión lateral (ya manejada en move_horizontal)
 
     def bordes(self):
+        self.isStuckScreen = False
         # Limitar al suelo
         if self.rect.bottom >= SCREEN_HEIGHT:
             self.rect.bottom = SCREEN_HEIGHT
@@ -123,9 +139,11 @@ class Player(pygame.sprite.Sprite):
         # Limitar el borde izquierdo
         if self.rect.left < 0:
             self.rect.left = 0
+            self.isStuckScreen = True
         # Limitar el borde derecho
         if self.rect.right > SCREEN_WIDTH:
             self.rect.right = SCREEN_WIDTH
+            self.isStuckScreen = True
 
     def jump(self):
         self.vel_y = self.jump_strength
